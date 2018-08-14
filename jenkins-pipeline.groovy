@@ -1,17 +1,15 @@
-node('maven') {
-    stage('build') {
-        echo 'building app :)'
-        openshiftBuild(buildConfig: 'app', showBuildLogs: 'true')
-    }
-    stage('verify') {
-        echo 'dummy verification....'
-    }
-    stage('deploy') {
-        input 'Manual Approval'
-        openshiftDeploy(deploymentConfig: 'app')
-    }
-    stage('promoting to QA') {
-       echo 'fake stage...'
-       sleep 5 
-    }
-}
+kind: "BuildConfig"
+apiVersion: "v1"
+metadata:
+  name: "workshop-pipeline"
+  annotations:
+    pipeline.alpha.openshift.io/uses: '[{"name": "workshop-ocp", "kind": "DeploymentConfig"}]'
+spec:
+  source:
+    type: "Git"
+    git:
+      uri: "http://github.com/<seu-usuario-do-github>/workshop-ocp.git"
+  strategy:
+    type: "JenkinsPipeline"
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: "jenkins-pipeline.groovy"
